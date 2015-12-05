@@ -6,6 +6,8 @@ package com.codility.numbers;
 public class TestClass {
 
     public static void main(String[] args) {
-        System.out.println("Test Class!");
+        String str = "test";
+        System.out.println(str + " Test Class!");
+
     }
 }
