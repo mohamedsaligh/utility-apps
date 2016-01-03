@@ -6,8 +6,13 @@ package com.codility.numbers;
 public class TestClass {
 
     public static void main(String[] args) {
-        String str = "test";
-        System.out.println(str + " Test Class!");
+        int a = 10;
+        int b = -5;
+        int c = 10;
+        int d = -2;
 
+        d = a >> c;
+
+        System.out.println("a!b, a=c" + d);
     }
 }

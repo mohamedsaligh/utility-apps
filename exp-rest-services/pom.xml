@@ -1,0 +1,151 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.saligh</groupId>
+        <artifactId>utility-apps</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>exp-rest-services</artifactId>
+    <packaging>war</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>exp-rest-services Maven Webapp</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <version.jdk>1.8</version.jdk>  <!-- 1.7 for JDK 7 -->
+        <version.mvn.compiler>3.2</version.mvn.compiler>
+        <version.mvn.war.plugin>2.6</version.mvn.war.plugin>
+        <version.jersey>2.15</version.jersey>
+        <version.servlet.api>3.1.0
+        </version.servlet.api>  <!-- use 3.0.1 for Tomcat 7 or Java EE 6 (i.e. Glassfish 3.x) -->
+    </properties>
+
+    <build>
+        <finalName>exp-rest-services</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version.mvn.compiler}</version>
+                <configuration>
+                    <source>${version.jdk}</source>
+                    <target>${version.jdk}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${version.mvn.war.plugin}</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>**/*.xml</include>
+                            </includes>
+                            <targetPath>WEB-INF</targetPath>
+                        </resource>
+                    </webResources>
+                    <failOnMissingWebXml>true</failOnMissingWebXml>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                    <outputDirectory>
+                        /Users/saligh/Documents/Tools/Libraries/jboss-eap-6.4/standalone/deployments/
+                    </outputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+            <!--  ~/.m2/respository/junit/junit/3.8.1/junit-3.8.1.jar -->
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${version.servlet.api}</version>
+            <scope>provided</scope>
+            <!--  ~/.m2/respository/javax/servlet/javax.servlet-api/xxx/javax.servlet-api-xxx.jar -->
+        </dependency>
+
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm-all</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>1.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.19</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>4.2.4.RELEASE</version>
+        </dependency>
+
+    </dependencies>
+</project>
+
+
+        <!--
+        com.xxx.yyy.zzz.command
+        com.xxx.yyy.zzz.service.impl
+                            |       |
+                            |       +- C: GoogleServiceImpl.java
+                            +- I: GoogleService.java
+        com.xxx.yyy.zzz.dao.impl
+                        |       |
+                        |       +- C: GoogleDaoImpl.java
+                        +- I: GoogleDao.java
+        com.xxx.yyy.zzz.exception
+                            |
+                            +- C: GoogleSingupException.java
+                            -->
+
+
+
