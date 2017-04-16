@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Cricket Team - Registration</title>
+
+	<link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="css/reset.css"> <!-- CSS reset -->
+	<link rel="stylesheet" href="css/style.css"> <!-- Gem style -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="js/modernizr.js"></script> <!-- Modernizr -->
+	<script>
+			function receive(saveData) {
+				if (saveData == null) {
+								alert("DATA IS UNDEFINED!");  // displays every time
+				}
+				// alert("Success is " + saveData);  // 'Success is undefined'
+			}
+
+			function updateTableData(jsonData) {
+				articles = jsonData;
+
+				$("tr:has(td)").remove();
+				console.log("response Json: " + articles);
+				console.log("response Json: " + articles.length);
+
+				$.each(articles, function (index, article) {
+						// 2.2 Create table column for categories
+						var td_categories = $("<td/>");
+
+						// 2.3 get each category of this article
+						// $.each(article.hand, function (i, category) {
+								var span = $("<span/>");
+								span.text(article.name);
+								td_categories.append(span);
+						// });
+
+						// 2.4 Create table column for tags
+					 var td_tags = $("<td/>");
+
+						// 2.5 get each tag of this article
+						// $.each(article.type, function (i, tag) {
+								var span = $("<span/>");
+								span.text(article.role);
+								td_tags.append(span);
+						// });
+
+						var td_team = $("<td/>");
+								var span = $("<span/>");
+								span.text(article.team);
+								td_team.append(span);
+
+						// 2.6 Create a new row and append 3 columns (title+url, categories, tags)
+						$("#added-articles").append($('<tr/>')
+										.append($('<td/>').html("<a href='#'>"+article.id+"</a>"))
+										.append(td_categories)
+										.append(td_tags)
+										.append(td_team)
+						);
+				});
+			}
+
+			$(document).ready(function(){
+					var articles;
+
+					$.ajax({
+								type: "GET",
+								cache: false,
+								crossDomain: true,
+								jsonp: false,
+								jsonpCallback: "receive",
+								dataType: 'jsonp',
+								url: "http://localhost:2222/api/home/players/getAll?callback=receive",
+								async: false,
+								// context: document.body,
+								success: function(data){
+										console.log("Inside AJAX Json: " + data);
+										articles = data;
+										updateTableData(data);
+								},
+
+								error: function (data, status, req) {
+		              //  alert(req.responseText + " " + status);
+		            },
+
+								complete: function(response, textStatus) {
+							    // alert("Hey: " + textStatus);
+							  }
+					});
+
+					$("#button").click(function(){
+							var name = $("#signup-username").val();
+							$.ajax({
+								 type: "GET",
+								 dataType: 'jsonp',
+								 url: "http://localhost:2222/api/home/hello/" + name,
+								 success: function(data) {
+											var converter = new Markdown.Converter();
+											$("#preview").html(converter.makeHtml(data));
+								 }
+							});
+					});
+
+					//$('#my-ajax-table').dynatable();
+			});
+	</script>
+</head>
+<body>
+	<header role="banner">
+			<div id="cd-logo">
+				<div class="knockout" style="font-size: 50px;">
+					<span style="color: #2f889a;"> COPI 2 </span> - Dev Team
+				</div>
+			</div>
+
+			<nav class="main-nav">
+				<ul>
+					<!-- inser more links here -->
+					<!-- <li><a class="cd-signin" href="#0">Sign in</a></li> -->
+					<li><a class="cd-signup" href="#0">Register</a></li>
+				</ul>
+			</nav>
+	</header>
+	<div id="cd-wrapper">
+		<br/><br/>
+		<h1 style="width: 80%; margin: 0px auto; font-size: 20px; color: #2f889a;">Registered Players</h1>
+		<div id="register-status"></div>
+		<br/>
+		<hr style="width: 80%; border: 0.5px #d3d3d3 solid;"/>
+		<table id="added-articles" class="table">
+            <tr>
+                <th>S.No</th>
+                <th>Name</th>
+                <th>Role</th>
+								<th>Team</th>
+            </tr>
+    </table>
+	</div>
+	<div class="cd-user-modal"> <!-- this is the entire modal form, including the background -->
+		<div class="cd-user-modal-container"> <!-- this is the container wrapper -->
+			<ul class="cd-switcher">
+				<!-- <li><a href="#0">Sign in</a></li> -->
+				<li><a style="font-size: 20px; color: #2f889a;"><span style="margin-left: -50px"> Player Registeration </span></a></li>
+			</ul>
+			<hr style="border: 0.5px solid #c8eff7; width: 90%;"/>
+			<div id="cd-signup"> <!-- sign up form -->
+				<form class="cd-form" id="player-registration">
+					<p class="fieldset">
+						<label class="image-replace cd-username" for="signup-username">Username</label>
+						<input class="full-width has-padding has-border" id="signup-username" name="name" type="text" placeholder="Full Name"/>
+						<span class="cd-error-message">Enter your full name</span>
+					</p>
+
+					<p class="fieldset">
+						<span class="image-replace">Player Role</span>
+						<input class="one-third" type="radio" id="player-role" name="role" value="Batsman" style="margin-left: 60px" checked="checked"> Batsman </input>
+						<input class="one-third" type="radio" id="player-role" name="role" value="Bowler" style="margin-left: 60px"> Bowler </input>
+						<input class="one-third" type="radio" id="player-role" name="role" value="All Rounder" style="margin-left: 60px"> All Rounder </input>
+						<span class="cd-error-message">Select at least one option</span>
+					</p>
+
+					<!-- <p class="fieldset">
+						<label class="image-replace cd-password" for="signup-password">Password</label>
+						<input class="full-width has-padding has-border" id="signup-password" type="text"  placeholder="Password">
+						<a href="#0" class="hide-password">Hide</a>
+						<span class="cd-error-message">Error message here!</span>
+					</p> -->
+
+					<!-- <p class="fieldset">
+						<input type="checkbox" id="accept-terms">
+						<label for="accept-terms">I agree to the <a href="#0">Terms</a></label>
+					</p> -->
+					<br/>
+					<p class="fieldset">
+						<input class="full-width has-padding" type="submit" value="Register">
+					</p>
+				</form>
+
+				<!-- <a href="#0" class="cd-close-form">Close</a> -->
+			</div> <!-- cd-signup -->
+
+			<!-- reset password form -->
+			<!-- <div id="cd-reset-password">
+				<div id="preview"></div>
+				<p class="cd-form-message">Lost your password? Please enter your email address. You will receive a link to create a new password.</p>
+
+				<form class="cd-form">
+					<p class="fieldset">
+						<label class="image-replace cd-email" for="reset-email">E-mail</label>
+						<input class="full-width has-padding has-border" id="reset-email" type="email" placeholder="E-mail">
+						<span class="cd-error-message">Error message here!</span>
+					</p>
+
+					<p class="fieldset">
+						<input class="full-width has-padding" type="submit" value="Reset password">
+					</p>
+				</form>
+
+				<p class="cd-form-bottom-message"><a href="#0">Back to log-in</a></p>
+			</div> <!- cd-reset-password -> -->
+			<a href="#0" class="cd-close-form">Close</a>
+		</div> <!-- cd-user-modal-container -->
+	</div> <!-- cd-user-modal -->
+<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+<script src="js/main.js"></script> <!-- Gem jQuery -->
+
+<br/><br/><br/><br/><br/>
+</body>
+</html>
