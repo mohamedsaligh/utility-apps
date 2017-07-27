@@ -1,0 +1,4 @@
+Notes:
+
+XCode Player fix:
+https://stackoverflow.com/questions/38116574/how-to-stop-avplayer-in-specific-time
