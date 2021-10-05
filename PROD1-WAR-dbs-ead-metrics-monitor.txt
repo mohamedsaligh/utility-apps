@@ -1,6 +1,0 @@
-
-call ../dbs-ead-setenv.bat
-
-mvn -o -Pprod1 clean package
-
-
