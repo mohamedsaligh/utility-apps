@@ -2,3 +2,18 @@ Notes:
 
 XCode Player fix:
 https://stackoverflow.com/questions/38116574/how-to-stop-avplayer-in-specific-time
+
+
+
+
+MT103: The MT103 is a widely used SWIFT message format for single customer credit transfers, providing detailed information about the sender, beneficiary, and financial institution involved in the transaction.
+
+MT900: The MT900 is a SWIFT message format used to confirm the receipt of a payment, typically sent by the beneficiary's bank to the remitter's bank, ensuring that the funds have been successfully credited to the beneficiary's account.
+
+MT910: The MT910 is a SWIFT message format used to notify the remitter's bank about the receipt of funds by the beneficiary's bank, providing confirmation of the credit entry and enabling reconciliation of accounts.
+
+MT202: The MT202 is a SWIFT message format used for financial institution transfers, providing information about correspondent banks involved in an international funds transfer, such as intermediary banks and beneficiary banks.
+
+MT202Cov: The MT202Cov is an enhanced version of the MT202 message format, primarily used for cover payments where the sender's correspondent bank instructs the receiver's correspondent bank to pay a beneficiary. It includes additional information to ensure compliance with regulatory requirements and facilitate transparency in cross-border transactions.
+
+MT199: The MT199 is a SWIFT message format used for free-format communication between financial institutions, allowing them to exchange non-standardized information, such as inquiries, confirmations, or status updates, that do not fit into any specific message category.
