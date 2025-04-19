@@ -1,32 +1,19 @@
-static_rules:
-  - id: check_status_active
-    description: "Static config item must have status as 'active'"
-    field: status
-    expected: "active"
-    level: error
+from fastapi import Request, HTTPException
+from typing import Dict
 
-  - id: check_required_name
-    description: "Static config item must have a name"
-    field: name
-    required: true
-    level: warning
 
-transactional_rules:
-  - id: check_positive_amount
-    description: "Transaction amount must be greater than 0"
-    field: amount
-    operator: ">"
-    value: 0
-    level: error
+def extract_auth_token(request: Request) -> str:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid or missing Authorization header")
+    return auth_header.split(" ")[1]
 
-  - id: check_valid_status
-    description: "Transaction status must be completed or pending"
-    field: status
-    allowed_values: ["completed", "pending"]
-    level: error
 
-  - id: check_timestamp_present
-    description: "Transaction must have a timestamp"
-    field: timestamp
-    required: true
-    level: warning
+def get_user_context(request: Request) -> Dict[str, str]:
+    token = extract_auth_token(request)
+    # This is a placeholder; in a real system you'd decode and verify token
+    user_id = "user-from-token"
+    return {
+        "user_id": user_id,
+        "token": token
+    }
