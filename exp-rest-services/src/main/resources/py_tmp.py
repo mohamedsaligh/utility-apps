@@ -1,82 +1,35 @@
-import aiohttp
-import asyncio
-import logging
-from typing import Optional, Dict, Any
-from app.config import settings
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.database.db import get_db
+from app.adapters.llm_client import LLMClient
+from app.repositories.session_repo import get_session_by_id, create_or_update_session
+from app.schemas.chat import ChatRequest, ChatResponse
 
-logger = logging.getLogger(__name__)
+chat_router = APIRouter()
 
-class LLMClient:
-    def __init__(self):
-        self.base_url = settings.LLM_API_URL
-        self.api_key = settings.LLM_API_KEY
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        self.session: Optional[aiohttp.ClientSession] = None
 
-    async def _ensure_session(self):
-        if self.session is None or self.session.closed:
-            self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
+class ChatService:
+    def __init__(self, llm_client: LLMClient, db: Session):
+        self.llm_client = llm_client
+        self.db = db
 
-    async def chat(self, message: str, session_context: Optional[dict] = None) -> Dict[str, Any]:
-        """
-        Sends a message to the LLM with session context.
-        """
-        await self._ensure_session()
-
-        payload = {
-            "message": message,
-            "context": session_context or {}
-        }
+    async def handle_chat(self, request: ChatRequest) -> ChatResponse:
+        session = get_session_by_id(self.db, request.session_id)
+        context = session.context if session else {}
 
         try:
-            async with self.session.post(
-                f"{self.base_url}/chat",
-                headers=self.headers,
-                json=payload
-            ) as response:
-                response.raise_for_status()
-                result = await response.json()
-                logger.info("LLM responded successfully")
-                return result
+            llm_response = await self.llm_client.chat(message=request.message, session_context=context)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="LLM request failed")
 
-        except aiohttp.ClientResponseError as http_err:
-            logger.error(f"HTTP error from LLM: {http_err.status} - {http_err.message}")
-            raise
+        new_context = llm_response.get("context", context)
+        reply = llm_response.get("reply", "[No response]")
 
-        except aiohttp.ClientError as client_err:
-            logger.error(f"Request error: {client_err}")
-            raise
+        create_or_update_session(
+            db=self.db,
+            session_id=request.session_id,
+            user=request.user,
+            context=new_context
+        )
 
-        except Exception as ex:
-            logger.error(f"Unexpected error: {ex}")
-            raise
-
-    async def ask_knowledge_base(self, question: str) -> Dict[str, Any]:
-        """
-        Asks a direct question to the long-term knowledge base.
-        """
-        await self._ensure_session()
-
-        payload = {
-            "question": question
-        }
-
-        try:
-            async with self.session.post(
-                f"{self.base_url}/knowledge-base/query",
-                headers=self.headers,
-                json=payload
-            ) as response:
-                response.raise_for_status()
-                return await response.json()
-
-        except Exception as ex:
-            logger.error(f"KB query failed: {ex}")
-            raise
-
-    async def close(self):
-        if self.session and not self.session.closed:
-            await self.session.close()
+        return ChatResponse(session_id=request.session_id, user=request.user, reply=reply)
