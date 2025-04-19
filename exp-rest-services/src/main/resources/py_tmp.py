@@ -1,66 +1,32 @@
-# chat
-from pydantic import BaseModel
+static_rules:
+  - id: check_status_active
+    description: "Static config item must have status as 'active'"
+    field: status
+    expected: "active"
+    level: error
 
+  - id: check_required_name
+    description: "Static config item must have a name"
+    field: name
+    required: true
+    level: warning
 
-class ChatRequest(BaseModel):
-    session_id: str
-    user: str
-    message: str
+transactional_rules:
+  - id: check_positive_amount
+    description: "Transaction amount must be greater than 0"
+    field: amount
+    operator: ">"
+    value: 0
+    level: error
 
+  - id: check_valid_status
+    description: "Transaction status must be completed or pending"
+    field: status
+    allowed_values: ["completed", "pending"]
+    level: error
 
-class ChatResponse(BaseModel):
-    session_id: str
-    user: str
-    reply: str
-
-
-
-# payment
-from pydantic import BaseModel, Field
-from typing import Optional, List, Any
-from datetime import datetime
-
-
-class Transaction(BaseModel):
-    id: str
-    amount: float
-    status: str
-    timestamp: Optional[datetime]
-    metadata: Optional[dict] = None
-
-
-class StaticConfigItem(BaseModel):
-    id: str
-    name: str
-    status: str
-    details: Optional[dict] = None
-
-
-class TransactionListResponse(BaseModel):
-    items: List[Transaction]
-
-
-class StaticConfigResponse(BaseModel):
-    items: List[StaticConfigItem]
-
-
-
-# validation
-from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-
-
-class ValidationIssue(BaseModel):
-    item: Optional[str]
-    issue: str
-    details: Optional[Dict[str, Any]] = None
-
-
-class ValidationResult(BaseModel):
-    status: str
-    issues: List[ValidationIssue]
-
-
-class ValidationRequest(BaseModel):
-    type: str
-    parameters: Optional[Dict[str, Any]] = None
+  - id: check_timestamp_present
+    description: "Transaction must have a timestamp"
+    field: timestamp
+    required: true
+    level: warning
