@@ -1,57 +1,46 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+from app.services.validation_service import ValidationService
 from app.adapters.payment_client import PaymentClient
-from typing import List, Dict, Any
+import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
+scheduler = AsyncIOScheduler()
+
+payment_client = PaymentClient()
+validation_service = ValidationService(payment_client)
 
 
-class ValidationService:
-    def __init__(self, payment_client: PaymentClient):
-        self.payment_client = payment_client
+async def run_static_validation():
+    try:
+        result = await validation_service.validate_static()
+        logger.info(f"Static validation result: {result}")
+    except Exception as e:
+        logger.error(f"Static validation failed: {str(e)}")
 
-    async def validate_static(self) -> Dict[str, Any]:
-        results = []
-        static_data = await self.payment_client.get_static_config_data()
 
-        if not static_data:
-            return {"status": "error", "message": "No static configuration found"}
+async def run_transactional_validation():
+    try:
+        result = await validation_service.validate_transactional()
+        logger.info(f"Transactional validation result: {result}")
+    except Exception as e:
+        logger.error(f"Transactional validation failed: {str(e)}")
 
-        for item in static_data.get("items", []):
-            if not item.get("status") or item["status"] != "active":
-                results.append({
-                    "item": item.get("id"),
-                    "issue": "Inactive or missing status"
-                })
 
-        return {
-            "status": "ok",
-            "issues": results
-        }
+def start_scheduler():
+    scheduler.add_job(
+        lambda: asyncio.create_task(run_static_validation()),
+        trigger=IntervalTrigger(minutes=60),
+        id="static_validation",
+        replace_existing=True
+    )
 
-    async def validate_transactional(self) -> Dict[str, Any]:
-        issues = []
-        transactions = await self.payment_client.get_transaction_data()
+    scheduler.add_job(
+        lambda: asyncio.create_task(run_transactional_validation()),
+        trigger=IntervalTrigger(minutes=60),
+        id="transactional_validation",
+        replace_existing=True
+    )
 
-        if not transactions:
-            return {"status": "error", "message": "No transactions found"}
-
-        for txn in transactions:
-            if not txn.get("amount") or txn["amount"] <= 0:
-                issues.append({
-                    "txn_id": txn.get("id"),
-                    "issue": "Invalid transaction amount"
-                })
-
-            if not txn.get("timestamp"):
-                issues.append({
-                    "txn_id": txn.get("id"),
-                    "issue": "Missing timestamp"
-                })
-
-            if txn.get("status") not in ["completed", "pending"]:
-                issues.append({
-                    "txn_id": txn.get("id"),
-                    "issue": f"Unexpected status: {txn.get('status')}"
-                })
-
-        return {
-            "status": "ok",
-            "issues": issues
-        }
+    scheduler.start()
