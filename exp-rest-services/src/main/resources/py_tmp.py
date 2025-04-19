@@ -1,17 +1,33 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, Index
-from datetime import datetime
-from app.database.db import Base
+from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
+from app.models.session import SessionContext
 
 
-class SessionContext(Base):
-    __tablename__ = "session_context"
+def get_session_by_id(db: Session, session_id: str) -> SessionContext | None:
+    return db.query(SessionContext).filter(SessionContext.session_id == session_id).first()
 
-    id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(String, unique=True, index=True, nullable=False)
-    user = Column(String, nullable=False)
-    context = Column(JSON, nullable=False)
-    last_updated = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    __table_args__ = (
-        Index("idx_session_last_updated", "last_updated"),
-    )
+def create_or_update_session(db: Session, session_id: str, user: str, context: dict) -> SessionContext:
+    session = get_session_by_id(db, session_id)
+    if session:
+        session.context = context
+        session.last_updated = datetime.utcnow()
+    else:
+        session = SessionContext(
+            session_id=session_id,
+            user=user,
+            context=context,
+            last_updated=datetime.utcnow()
+        )
+        db.add(session)
+
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def cleanup_old_sessions(db: Session, days: int = 30) -> int:
+    expiry = datetime.utcnow() - timedelta(days=days)
+    deleted = db.query(SessionContext).filter(SessionContext.last_updated < expiry).delete()
+    db.commit()
+    return deleted
