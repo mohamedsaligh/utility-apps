@@ -1,33 +1,19 @@
-from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
-from app.models.session import SessionContext
+from app.adapters.payment_client import PaymentClient
+from typing import List, Dict, Any
 
 
-def get_session_by_id(db: Session, session_id: str) -> SessionContext | None:
-    return db.query(SessionContext).filter(SessionContext.session_id == session_id).first()
+class PaymentService:
+    def __init__(self, payment_client: PaymentClient):
+        self.payment_client = payment_client
 
+    async def fetch_transactions(self) -> List[Dict[str, Any]]:
+        transactions = await self.payment_client.get_transaction_data()
+        return transactions
 
-def create_or_update_session(db: Session, session_id: str, user: str, context: dict) -> SessionContext:
-    session = get_session_by_id(db, session_id)
-    if session:
-        session.context = context
-        session.last_updated = datetime.utcnow()
-    else:
-        session = SessionContext(
-            session_id=session_id,
-            user=user,
-            context=context,
-            last_updated=datetime.utcnow()
-        )
-        db.add(session)
+    async def fetch_static_configurations(self) -> Dict[str, Any]:
+        configs = await self.payment_client.get_static_config_data()
+        return configs
 
-    db.commit()
-    db.refresh(session)
-    return session
-
-
-def cleanup_old_sessions(db: Session, days: int = 30) -> int:
-    expiry = datetime.utcnow() - timedelta(days=days)
-    deleted = db.query(SessionContext).filter(SessionContext.last_updated < expiry).delete()
-    db.commit()
-    return deleted
+    async def fetch_transactions_by_filter(self, filter_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        transactions = await self.payment_client.get_transaction_data(filter_params=filter_params)
+        return transactions
