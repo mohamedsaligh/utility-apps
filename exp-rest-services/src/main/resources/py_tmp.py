@@ -1,35 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.database.db import get_db
-from app.adapters.llm_client import LLMClient
-from app.repositories.session_repo import get_session_by_id, create_or_update_session
-from app.schemas.chat import ChatRequest, ChatResponse
-
-chat_router = APIRouter()
+from sqlalchemy import Column, Integer, String, JSON, DateTime, Index
+from datetime import datetime
+from app.database.db import Base
 
 
-class ChatService:
-    def __init__(self, llm_client: LLMClient, db: Session):
-        self.llm_client = llm_client
-        self.db = db
+class SessionContext(Base):
+    __tablename__ = "session_context"
 
-    async def handle_chat(self, request: ChatRequest) -> ChatResponse:
-        session = get_session_by_id(self.db, request.session_id)
-        context = session.context if session else {}
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, unique=True, index=True, nullable=False)
+    user = Column(String, nullable=False)
+    context = Column(JSON, nullable=False)
+    last_updated = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-        try:
-            llm_response = await self.llm_client.chat(message=request.message, session_context=context)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="LLM request failed")
-
-        new_context = llm_response.get("context", context)
-        reply = llm_response.get("reply", "[No response]")
-
-        create_or_update_session(
-            db=self.db,
-            session_id=request.session_id,
-            user=request.user,
-            context=new_context
-        )
-
-        return ChatResponse(session_id=request.session_id, user=request.user, reply=reply)
+    __table_args__ = (
+        Index("idx_session_last_updated", "last_updated"),
+    )
