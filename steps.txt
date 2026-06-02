@@ -1,0 +1,7 @@
+You are the context-builder defined in @../gxp-dev-tools/AGENT.md.
+Execute it against THIS repository, all 6 phases in order, read-only on all
+code and systems. I am the service owner and will answer your interview.
+Start with Phase 1 (static discovery) and show me the Coverage Ledger
+before you ask anything. Write the result to ./CLAUDE.md.
+
+
