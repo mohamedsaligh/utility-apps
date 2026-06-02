@@ -1,11 +1,11 @@
-@../platform-context-pack.md
+@../gxp-dev-tools/platform-context-pack.md
 
-# payment-service — owned by Payments team
+# gxp-payment-service — owned by Payments team
 
 > Inherits all Golden patterns and invariants from the Platform Context Pack above.
 > This file records **only what is specific to payment-service.** Sections marked
 > *(derived)* are regenerated from code/specs in CI; *(tacit)* are human-curated and are
-> the irreplaceable part. Built and kept fresh by `AGENT.md`.
+> the irreplaceable part. Built and kept fresh by `../gxp-dev-tools/AGENT.md`.
 
 ## What it does *(tacit)*
 Authorizes, captures, refunds, and reconciles payments across external providers, and is the
